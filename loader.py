@@ -8,8 +8,11 @@ import torch
 #Modified from https://github.com/aladdinpersson/Machine-Learning-Collection/blob/master/ML/Pytorch/more_advanced/image_captioning/get_loader.py
 class Vocabulary:
     def __init__(self, freq_thres=1):
-        self.itos = {0: "<PAD>", 1: "<SOS>", 2: "<EOS>", 3: "<UNK>"}
-        self.stoi = {"<PAD>": 0, "<SOS>": 1, "<EOS>": 2, "<UNK>": 3}
+
+        # [CLS] - > Start of sentance/sequence
+        # [SEP] - > END of sentance/sequence
+        self.itos = {0: "[PAD]", 1: "[CLS]", 2: "[SEP]", 3: "[UNK]", 4: "[MASK]"}
+        self.stoi = {"[PAD]": 0, "[CLS]": 1, "[SEP]": 2, "[UNK]": 3, "[MASK]": 4}
         self.freq_threshold = freq_thres
 
     def __len__(self):
@@ -22,7 +25,7 @@ class Vocabulary:
 
     def build_vocabulary(self, seq_list):
         frequencies = {}
-        idx = 4
+        idx = len(self.itos)
         for idx1, base in enumerate(list('acgut')):
             self.stoi[base] = idx+idx1
             self.itos[idx+idx1] = base
