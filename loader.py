@@ -9,21 +9,27 @@ import torch
 class Vocabulary:
     def __init__(self, freq_thres=1):
 
-        # [CLS] - > Start of sentance/sequence
-        # [SEP] - > END of sentance/sequence
-        self.itos = {0: "[PAD]", 1: "[CLS]", 2: "[SEP]", 3: "[UNK]", 4: "[MASK]"}
-        self.stoi = {"[PAD]": 0, "[CLS]": 1, "[SEP]": 2, "[UNK]": 3, "[MASK]": 4}
+        self.itos = {0: "[PAD]", 1: "[START]", 2: "[END]", 3: "[UNK]", 4: "[MASK]"}
+        self.stoi = {"[PAD]": 0, "[START]": 1, "[END]": 2, "[UNK]": 3, "[MASK]": 4}
         self.freq_threshold = freq_thres
 
     def __len__(self):
         return len(self.itos)
+
+    #returns the numeric token value of a given string token
+    def get_idx(self, token):
+        return self.stoi[token]
+    
+    #returns the alphanumeric token value given the token idx
+    def get_token(self, token):
+        return self.itos[token]
 
     @staticmethod
     def tokenizer_seq(fasta_seq):
 #         print(fasta_seq)
         return [str(x) for x in list(fasta_seq)]
 
-    def build_vocabulary(self, seq_list):
+    def build_vocabulary(self):
         frequencies = {}
         idx = len(self.itos)
         for idx1, base in enumerate(list('acgut')):
@@ -32,9 +38,8 @@ class Vocabulary:
 
     def numericalize(self, fasta_seq):
         tokenized_seq = self.tokenizer_seq(fasta_seq.lower())
-
         return [
-            self.stoi[token] if token in self.stoi else self.stoi["<UNK>"]
+            self.stoi[token] if token in self.stoi else self.stoi["[UNK]"]
             for token in tokenized_seq
         ]
 
@@ -59,10 +64,11 @@ class SequenceDataset(Dataset):
         return len(self.df)
 
     def numericalize_seq(self,seq):
-        numericalized_seq = [self.vocab.stoi["<SOS>"]]
+        numericalized_seq = [self.vocab.stoi["[START]"]]
         numericalized_seq += self.vocab.numericalize(seq)
-        numericalized_seq.append(self.vocab.stoi["<EOS>"])
+        numericalized_seq.append(self.vocab.stoi["[END]"])
         return numericalized_seq
+
     def get_vocabulary(self):
         return self.vocab.stoi
 
